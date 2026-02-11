@@ -2,13 +2,16 @@
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  transition: border-color var(--transition-fast);
-  animation: slideUp 0.3s ease both;
+  padding: var(--space-8);
+  transition: all var(--transition-base);
+  animation: slideUp 0.4s ease both;
+  transform: translateY(0);
 }
 
 .card:hover {
   border-color: var(--color-border);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .edited {
@@ -152,11 +155,18 @@
   border-radius: var(--radius-sm);
   color: var(--color-text-muted);
   transition: all var(--transition-fast);
+  transform: scale(1);
 }
 
 .actionBtn:hover {
   color: var(--color-text-primary);
   background: var(--color-bg-elevated);
+  transform: scale(1.1);
+}
+
+.actionBtn:active {
+  transform: scale(0.9);
+  transition-duration: 80ms;
 }
 
 .regenForm {

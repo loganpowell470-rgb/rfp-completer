@@ -8,6 +8,16 @@
   transition: all var(--transition-base);
   white-space: nowrap;
   position: relative;
+  transform: translateY(0);
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+  transition-duration: 80ms;
 }
 
 .button:disabled {
@@ -51,6 +61,7 @@
 .secondary:hover:not(:disabled) {
   background: var(--color-bg-hover);
   border-color: var(--color-text-muted);
+  box-shadow: var(--shadow-sm);
 }
 
 .ghost {

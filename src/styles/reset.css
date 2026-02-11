@@ -54,3 +54,24 @@ img, svg {
 ul, ol {
   list-style: none;
 }
+
+/* Global focus-visible for accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Selection color */
+::selection {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}

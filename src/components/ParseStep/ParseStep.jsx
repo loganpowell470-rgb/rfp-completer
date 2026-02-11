@@ -53,19 +53,23 @@ export default function ParseStep() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <div>
+        <div className={styles.headerRow}>
           <h2 className={styles.heading}>
-            {state.questions.length} questions found
+            <span className={styles.headingCount}>{state.questions.length}</span> questions found
           </h2>
-          <p className={styles.subheading}>
-            Review the extracted questions below, then generate responses.
-          </p>
+          <span className={styles.successBadge}>
+            <Icon name="check" size={12} />
+            Parsed
+          </span>
         </div>
+        <p className={styles.subheading}>
+          Review the extracted questions below, then generate responses.
+        </p>
       </div>
 
       <div className={styles.sections}>
-        {Object.entries(sections).map(([section, questions]) => (
-          <div key={section} className={styles.section}>
+        {Object.entries(sections).map(([section, questions], sectionIdx) => (
+          <div key={section} className={styles.section} style={{ animationDelay: `${sectionIdx * 0.1}s` }}>
             <h3 className={styles.sectionTitle}>{section}</h3>
             <div className={styles.questionList}>
               {questions.map((q) => (

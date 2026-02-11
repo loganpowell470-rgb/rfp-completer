@@ -1,7 +1,7 @@
 .container {
   max-width: 860px;
   margin: 0 auto;
-  padding: var(--space-8) var(--space-6) var(--space-20);
+  padding: var(--space-10) var(--space-6) var(--space-20);
   animation: fadeIn 0.4s ease;
 }
 
@@ -51,11 +51,18 @@
   border: 1px solid var(--color-border);
   white-space: nowrap;
   transition: all var(--transition-fast);
+  transform: scale(1);
 }
 
 .filterChip:hover {
   color: var(--color-text-primary);
   border-color: var(--color-text-muted);
+  transform: scale(1.03);
+}
+
+.filterChip:active {
+  transform: scale(0.97);
+  transition-duration: 80ms;
 }
 
 .filterActive {

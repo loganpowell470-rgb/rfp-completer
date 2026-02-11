@@ -1,5 +1,5 @@
 .container {
-  max-width: 720px;
+  max-width: 740px;
   margin: 0 auto;
   padding: var(--space-12) var(--space-6);
   animation: fadeIn 0.4s ease;
@@ -55,6 +55,7 @@
   border-color: var(--color-accent);
   background: var(--color-accent-light);
   box-shadow: var(--shadow-glow);
+  transform: scale(1.01);
 }
 
 .dropZoneHasFile {
