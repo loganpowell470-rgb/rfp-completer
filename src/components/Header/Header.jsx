@@ -9,9 +9,8 @@ export default function Header() {
     <header className={styles.header}>
       <div className={styles.left}>
         <h1 className={styles.title} onClick={actions.reset}>
-          RFP Completer
+          RFP<span className={styles.dot}>.</span>Engine
         </h1>
-        <span className={styles.badge}>AI-Powered</span>
       </div>
       <div className={styles.right}>
         <button
