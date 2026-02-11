@@ -12,6 +12,7 @@ const initialState = {
   pdfBase64: null,
   pdfFilename: null,
   rawText: '',
+  spreadsheetFilename: null,
 
   // Knowledge base
   knowledgeBase: SAMPLE_KNOWLEDGE_BASE,
@@ -20,6 +21,7 @@ const initialState = {
   parseStatus: 'idle',
   parseError: null,
   questions: [],
+  rfpSummary: null,
 
   // Generate
   generateStatus: 'idle',
@@ -44,6 +46,7 @@ function rfpReducer(state, action) {
         pdfBase64: action.payload.base64,
         pdfFilename: action.payload.filename,
         rawText: '',
+        spreadsheetFilename: null,
       };
 
     case 'SET_TEXT':
@@ -51,6 +54,17 @@ function rfpReducer(state, action) {
         ...state,
         uploadType: 'text',
         rawText: action.payload,
+        pdfBase64: null,
+        pdfFilename: null,
+        spreadsheetFilename: null,
+      };
+
+    case 'SET_SPREADSHEET':
+      return {
+        ...state,
+        uploadType: 'text',
+        rawText: action.payload.text,
+        spreadsheetFilename: action.payload.filename,
         pdfBase64: null,
         pdfFilename: null,
       };
@@ -65,13 +79,14 @@ function rfpReducer(state, action) {
       return { ...state, kbPanelOpen: false };
 
     case 'PARSE_START':
-      return { ...state, parseStatus: 'loading', parseError: null, currentStep: 1 };
+      return { ...state, parseStatus: 'loading', parseError: null, rfpSummary: null, currentStep: 1 };
 
     case 'PARSE_SUCCESS':
       return {
         ...state,
         parseStatus: 'success',
-        questions: action.payload,
+        questions: action.payload.questions,
+        rfpSummary: action.payload.summary || null,
         responses: {},
       };
 
@@ -195,6 +210,10 @@ export function useRfpWorkflow() {
     dispatch({ type: 'SET_TEXT', payload: text });
   }, []);
 
+  const uploadSpreadsheet = useCallback((data) => {
+    dispatch({ type: 'SET_SPREADSHEET', payload: data });
+  }, []);
+
   const setKnowledgeBase = useCallback((text) => {
     dispatch({ type: 'SET_KNOWLEDGE_BASE', payload: text });
   }, []);
@@ -219,7 +238,13 @@ export function useRfpWorkflow() {
       }
 
       const data = await res.json();
-      dispatch({ type: 'PARSE_SUCCESS', payload: data.questions });
+      dispatch({
+        type: 'PARSE_SUCCESS',
+        payload: {
+          questions: data.questions,
+          summary: data.summary || null,
+        },
+      });
     } catch (err) {
       dispatch({ type: 'PARSE_ERROR', payload: err.message });
     }
@@ -397,6 +422,7 @@ export function useRfpWorkflow() {
     actions: {
       uploadPdf,
       uploadText,
+      uploadSpreadsheet,
       setKnowledgeBase,
       parseDocument,
       generateResponses,

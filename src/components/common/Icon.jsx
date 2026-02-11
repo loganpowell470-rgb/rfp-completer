@@ -47,6 +47,19 @@ const icons = {
       <path d="M12 8v4M12 16h.01" strokeWidth="2" strokeLinecap="round" />
     </>
   ),
+  table: (
+    <path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  ),
+  target: (
+    <>
+      <circle cx="12" cy="12" r="10" strokeWidth="2" />
+      <circle cx="12" cy="12" r="6" strokeWidth="2" />
+      <circle cx="12" cy="12" r="2" strokeWidth="2" />
+    </>
+  ),
+  barChart: (
+    <path d="M12 20V10M18 20V4M6 20v-4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  ),
 };
 
 export default function Icon({ name, size = 20, className = '' }) {

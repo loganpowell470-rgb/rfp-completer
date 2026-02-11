@@ -8,36 +8,59 @@ export default function UploadStep() {
   const { state, actions } = useRfp();
 
   const { isDragging, error, handleDragOver, handleDragLeave, handleDrop, handleFileSelect } =
-    useFileUpload({ onFile: actions.uploadPdf });
+    useFileUpload({
+      onFile: actions.uploadPdf,
+      onSpreadsheet: actions.uploadSpreadsheet,
+    });
 
-  const hasContent = state.uploadType === 'pdf' ? !!state.pdfBase64 : state.rawText.trim().length > 0;
+  const hasFile = !!state.pdfFilename || !!state.spreadsheetFilename;
+  const displayFilename = state.pdfFilename || state.spreadsheetFilename;
+  const hasContent = hasFile || state.rawText.trim().length > 0;
+
+  const getFileSize = () => {
+    if (state.pdfBase64) {
+      return `${(state.pdfBase64.length * 0.75 / 1024 / 1024).toFixed(1)} MB`;
+    }
+    if (state.spreadsheetFilename && state.rawText) {
+      const kb = new Blob([state.rawText]).size / 1024;
+      return kb >= 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${Math.round(kb)} KB`;
+    }
+    return '';
+  };
+
+  const getFileIcon = () => {
+    if (state.spreadsheetFilename) return 'table';
+    return 'file';
+  };
+
+  const handleRemoveFile = () => {
+    actions.uploadText('');
+  };
 
   return (
     <div className={styles.container}>
       <div className={styles.hero}>
         <h2 className={styles.heading}>Upload your RFP</h2>
         <p className={styles.subheading}>
-          Drop a PDF or paste the RFP text below. We'll extract every question and generate draft responses.
+          Drop a PDF, CSV, or Excel file — or paste the RFP text below. We'll extract every question and generate draft responses.
         </p>
       </div>
 
       <div className={styles.inputs}>
         <div
-          className={`${styles.dropZone} ${isDragging ? styles.dropZoneDragging : ''} ${state.pdfFilename ? styles.dropZoneHasFile : ''}`}
+          className={`${styles.dropZone} ${isDragging ? styles.dropZoneDragging : ''} ${hasFile ? styles.dropZoneHasFile : ''}`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          {state.pdfFilename ? (
+          {hasFile ? (
             <div className={styles.fileInfo}>
-              <Icon name="file" size={32} className={styles.fileIcon} />
-              <span className={styles.fileName}>{state.pdfFilename}</span>
-              <span className={styles.fileSize}>
-                {(state.pdfBase64.length * 0.75 / 1024 / 1024).toFixed(1)} MB
-              </span>
+              <Icon name={getFileIcon()} size={32} className={styles.fileIcon} />
+              <span className={styles.fileName}>{displayFilename}</span>
+              <span className={styles.fileSize}>{getFileSize()}</span>
               <button
                 className={styles.removeFile}
-                onClick={() => actions.uploadText('')}
+                onClick={handleRemoveFile}
               >
                 <Icon name="x" size={16} />
               </button>
@@ -46,19 +69,19 @@ export default function UploadStep() {
             <>
               <Icon name="upload" size={36} className={styles.uploadIcon} />
               <p className={styles.dropText}>
-                {isDragging ? 'Drop your PDF here' : 'Drag & drop your RFP document'}
+                {isDragging ? 'Drop your file here' : 'Drag & drop your RFP document'}
               </p>
               <p className={styles.dropSubtext}>or</p>
               <label className={styles.browseButton}>
                 Browse files
                 <input
                   type="file"
-                  accept=".pdf"
+                  accept=".pdf,.csv,.xlsx,.xls"
                   onChange={handleFileSelect}
                   className={styles.fileInput}
                 />
               </label>
-              <p className={styles.fileTypes}>PDF files up to 32MB</p>
+              <p className={styles.fileTypes}>PDF, CSV, Excel files up to 32MB</p>
             </>
           )}
         </div>

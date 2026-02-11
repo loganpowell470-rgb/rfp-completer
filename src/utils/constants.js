@@ -12,4 +12,4 @@ export const API_ENDPOINTS = {
 };
 
 export const MAX_FILE_SIZE = 32 * 1024 * 1024; // 32MB
-export const ACCEPTED_FILE_TYPES = ['.pdf'];
+export const ACCEPTED_FILE_TYPES = ['.pdf', '.csv', '.xlsx', '.xls'];
