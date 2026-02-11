@@ -1,0 +1,229 @@
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-12) var(--space-6);
+  animation: fadeIn 0.4s ease;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: var(--space-10);
+}
+
+.heading {
+  font-family: var(--font-heading);
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-3);
+}
+
+.subheading {
+  font-size: var(--text-lg);
+  color: var(--color-text-secondary);
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: var(--leading-relaxed);
+}
+
+.inputs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.dropZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-12) var(--space-8);
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-secondary);
+  transition: all var(--transition-base);
+  cursor: pointer;
+}
+
+.dropZone:hover {
+  border-color: var(--color-text-muted);
+  background: var(--color-bg-elevated);
+}
+
+.dropZoneDragging {
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
+  box-shadow: var(--shadow-glow);
+}
+
+.dropZoneHasFile {
+  border-style: solid;
+  border-color: var(--color-success);
+  background: var(--color-success-light);
+  padding: var(--space-6) var(--space-8);
+}
+
+.uploadIcon {
+  color: var(--color-text-muted);
+}
+
+.dropText {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.dropSubtext {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.browseButton {
+  display: inline-flex;
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.browseButton:hover {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.fileInput {
+  display: none;
+}
+
+.fileTypes {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.fileInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.fileIcon {
+  color: var(--color-success);
+  flex-shrink: 0;
+}
+
+.fileName {
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileSize {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.removeFile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--color-text-muted);
+  transition: all var(--transition-fast);
+}
+
+.removeFile:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-error);
+}
+
+.dividerRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.dividerText {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: var(--weight-medium);
+}
+
+.textArea {
+  width: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  resize: vertical;
+  min-height: 160px;
+  transition: border-color var(--transition-fast);
+}
+
+.textArea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-light);
+}
+
+.textArea:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.textArea::placeholder {
+  color: var(--color-text-muted);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-error-light);
+  color: var(--color-error);
+  font-size: var(--text-sm);
+  margin-top: var(--space-4);
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-8);
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .heading {
+    font-size: var(--text-3xl);
+  }
+
+  .dropZone {
+    padding: var(--space-8) var(--space-4);
+  }
+}
