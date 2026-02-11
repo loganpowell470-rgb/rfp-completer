@@ -27,7 +27,7 @@ ${instructions ? `\n## Additional Instructions from Reviewer:\n${instructions}` 
 Write ONLY the response text. Do not include the question or any delimiters.`;
 
     const stream = await client.messages.create({
-      model: 'claude-sonnet-4-5-20250514',
+      model: 'claude-sonnet-4-20250514',
       max_tokens: 4096,
       stream: true,
       system: systemPrompt,

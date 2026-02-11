@@ -47,7 +47,7 @@ We maintain SOC 2 Type II certification and...
 Do NOT include the question text in your response. Just write the answer directly.`;
 
     const stream = await client.messages.create({
-      model: 'claude-sonnet-4-5-20250514',
+      model: 'claude-sonnet-4-20250514',
       max_tokens: 16384,
       stream: true,
       system: systemPrompt,

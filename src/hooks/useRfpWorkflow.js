@@ -92,6 +92,9 @@ function rfpReducer(state, action) {
     case 'GENERATE_STREAM_CHUNK':
       return { ...state, streamBuffer: state.streamBuffer + action.payload };
 
+    case 'SET_STREAM_DISPLAY':
+      return { ...state, streamBuffer: action.payload };
+
     case 'GENERATE_RESPONSE_COMPLETE': {
       const { questionId, text } = action.payload;
       const completedCount = Object.keys(state.responses).length + 1;
@@ -232,26 +235,25 @@ export function useRfpWorkflow() {
     };
 
     let fullBuffer = '';
+    let displayBuffer = '';
     const completedResponses = {};
 
     await fetchStream(API_ENDPOINTS.generate, body, {
       onChunk: (text) => {
         fullBuffer += text;
-        dispatch({ type: 'GENERATE_STREAM_CHUNK', payload: text });
+        displayBuffer += text;
 
-        // Check for response boundaries
-        const boundaryRegex = /---RESPONSE_BOUNDARY:(q\d+)---/g;
+        // Check for response boundaries (permissive ID match)
+        const boundaryRegex = /---RESPONSE_BOUNDARY:([a-zA-Z0-9_]+)---/g;
         let match;
         let lastIndex = 0;
 
         while ((match = boundaryRegex.exec(fullBuffer)) !== null) {
           const questionId = match[1];
           if (!completedResponses[questionId]) {
-            // Find the text between the last boundary and this one
             const responseText = fullBuffer.substring(lastIndex, match.index);
             completedResponses[questionId] = true;
 
-            // Find the next question ID
             const qIndex = state.questions.findIndex(q => q.id === questionId);
             const nextId = qIndex < state.questions.length - 1
               ? state.questions[qIndex + 1].id
@@ -261,6 +263,7 @@ export function useRfpWorkflow() {
               type: 'GENERATE_RESPONSE_COMPLETE',
               payload: { questionId, text: responseText, nextId },
             });
+            displayBuffer = '';
           }
           lastIndex = match.index + match[0].length;
         }
@@ -268,18 +271,53 @@ export function useRfpWorkflow() {
         // Trim the buffer to keep only unprocessed text
         if (lastIndex > 0) {
           fullBuffer = fullBuffer.substring(lastIndex);
+          displayBuffer = fullBuffer;
         }
+
+        // Update streamBuffer with only in-progress text (after last boundary)
+        dispatch({ type: 'SET_STREAM_DISPLAY', payload: displayBuffer });
       },
       onComplete: () => {
-        // Handle any remaining text as the last response
+        // Handle remaining text for unanswered questions
         const answeredIds = new Set(Object.keys(completedResponses));
         const unanswered = state.questions.filter(q => !answeredIds.has(q.id));
 
-        if (unanswered.length === 1 && fullBuffer.trim()) {
-          dispatch({
-            type: 'GENERATE_RESPONSE_COMPLETE',
-            payload: { questionId: unanswered[0].id, text: fullBuffer },
-          });
+        if (unanswered.length > 0 && fullBuffer.trim()) {
+          // Try to split remaining buffer by any boundaries we might have missed
+          const remainingBoundaryRegex = /---RESPONSE_BOUNDARY:([a-zA-Z0-9_]+)---/g;
+          const parts = fullBuffer.split(remainingBoundaryRegex);
+
+          if (parts.length === 1) {
+            // No boundaries in remaining text — assign to first unanswered question
+            dispatch({
+              type: 'GENERATE_RESPONSE_COMPLETE',
+              payload: { questionId: unanswered[0].id, text: fullBuffer },
+            });
+          } else {
+            // There were boundaries in the remaining buffer — process them
+            // parts alternates: [text, id, text, id, ...]
+            let partIdx = 0;
+            for (let i = 0; i < parts.length; i += 2) {
+              const text = parts[i];
+              const id = parts[i + 1]; // boundary ID
+              if (id && text?.trim()) {
+                dispatch({
+                  type: 'GENERATE_RESPONSE_COMPLETE',
+                  payload: { questionId: id, text },
+                });
+              } else if (!id && text?.trim() && partIdx < unanswered.length) {
+                // Last text chunk without a trailing boundary
+                const targetQuestion = unanswered.find(q => !completedResponses[q.id]);
+                if (targetQuestion) {
+                  dispatch({
+                    type: 'GENERATE_RESPONSE_COMPLETE',
+                    payload: { questionId: targetQuestion.id, text },
+                  });
+                }
+              }
+              partIdx++;
+            }
+          }
         }
 
         dispatch({ type: 'GENERATE_ALL_COMPLETE' });
