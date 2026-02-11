@@ -1,8 +1,17 @@
+import { useState, useEffect } from 'react';
 import { useRfp } from '../../context/RfpContext';
 import Icon from '../common/Icon';
 import Button from '../common/Button';
 import Spinner from '../common/Spinner';
 import styles from './ParseStep.module.css';
+
+const LOADING_PHASES = [
+  'Reading document structure...',
+  'Identifying sections and categories...',
+  'Extracting questions and requirements...',
+  'Analyzing customer priorities...',
+  'Finalizing results...',
+];
 
 const PRIORITY_COLORS = {
   high: 'var(--color-error)',
@@ -16,6 +25,18 @@ const PRIORITY_BG = {
   low: 'rgba(129, 178, 154, 0.12)',
 };
 
+function LoadingPhase() {
+  const [phase, setPhase] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPhase(p => (p + 1) % LOADING_PHASES.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return <p className={styles.loadingText}>{LOADING_PHASES[phase]}</p>;
+}
+
 export default function ParseStep() {
   const { state, actions } = useRfp();
 
@@ -25,9 +46,7 @@ export default function ParseStep() {
         <div className={styles.loading}>
           <Spinner size={48} />
           <h2 className={styles.loadingTitle}>Analyzing your RFP</h2>
-          <p className={styles.loadingText}>
-            Extracting questions, requirements, and deliverables...
-          </p>
+          <LoadingPhase />
         </div>
       </div>
     );

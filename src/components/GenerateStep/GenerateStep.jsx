@@ -33,6 +33,9 @@ export default function GenerateStep() {
   const totalCount = state.questions.length;
   const progress = totalCount > 0 ? Math.round((answeredCount / totalCount) * 100) : 0;
 
+  // Get the current question being answered
+  const currentQuestion = state.questions[answeredCount];
+
   return (
     <div className={styles.container}>
       <div className={styles.content}>
@@ -41,7 +44,7 @@ export default function GenerateStep() {
         </div>
         <h2 className={styles.heading}>Generating responses</h2>
         <p className={styles.subheading}>
-          Drafting answer {Math.min(answeredCount + 1, totalCount)} of {totalCount}...
+          Drafting answer {Math.min(answeredCount + 1, totalCount)} of {totalCount}
         </p>
 
         <div className={styles.progressWrap}>
@@ -54,15 +57,16 @@ export default function GenerateStep() {
           <span className={styles.progressLabel}>{progress}%</span>
         </div>
 
-        {state.streamBuffer && (
-          <div className={styles.preview}>
-            <div className={styles.previewHeader}>
-              <span className={styles.previewLabel}>Live preview</span>
-              <span className={styles.previewDot} />
+        {/* Show current question being answered instead of raw stream text */}
+        {currentQuestion && (
+          <div className={styles.currentQuestion}>
+            <div className={styles.currentQuestionHeader}>
+              <span className={styles.currentQuestionLabel}>Now answering</span>
+              <span className={styles.currentQuestionDot} />
             </div>
-            <p className={styles.previewText}>
-              {state.streamBuffer.slice(-500)}
-              <span className={styles.cursor}>|</span>
+            <p className={styles.currentQuestionText}>
+              <span className={styles.currentQuestionId}>{currentQuestion.id.toUpperCase()}</span>
+              {currentQuestion.question}
             </p>
           </div>
         )}

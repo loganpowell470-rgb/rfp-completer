@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRfp } from '../../context/RfpContext';
+import { useToast } from '../../context/ToastContext';
 import Icon from '../common/Icon';
 import Button from '../common/Button';
 import Spinner from '../common/Spinner';
@@ -8,6 +9,7 @@ import styles from './ResponseCard.module.css';
 
 export default function ResponseCard({ question }) {
   const { state, actions } = useRfp();
+  const { showToast } = useToast();
   const response = state.responses[question.id];
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState('');
@@ -108,7 +110,10 @@ export default function ResponseCard({ question }) {
               </button>
               <button
                 className={styles.actionBtn}
-                onClick={() => navigator.clipboard.writeText(response?.text || '')}
+                onClick={() => {
+                  navigator.clipboard.writeText(response?.text || '');
+                  showToast('Response copied');
+                }}
                 title="Copy response"
               >
                 <Icon name="copy" size={15} />

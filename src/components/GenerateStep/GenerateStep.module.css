@@ -27,7 +27,6 @@
 .subheading {
   color: var(--color-text-secondary);
   font-size: var(--text-lg);
-  animation: pulse 2s ease-in-out infinite;
 }
 
 .progressWrap {
@@ -76,24 +75,27 @@
   font-variant-numeric: tabular-nums;
 }
 
-.preview {
+/* ── Current Question Card ─────────────────────── */
+
+.currentQuestion {
   width: 100%;
-  margin-top: var(--space-8);
-  padding: var(--space-4);
+  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-5);
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-md);
   text-align: left;
+  animation: fadeIn 0.3s ease;
 }
 
-.previewHeader {
+.currentQuestionHeader {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-2);
 }
 
-.previewLabel {
+.currentQuestionLabel {
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
   color: var(--color-text-muted);
@@ -101,25 +103,29 @@
   letter-spacing: 0.08em;
 }
 
-.previewDot {
+.currentQuestionDot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--color-success);
-  animation: pulse 1s ease-in-out infinite;
+  background: var(--color-accent);
+  animation: pulse 1.2s ease-in-out infinite;
 }
 
-.previewText {
+.currentQuestionText {
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
   line-height: var(--leading-relaxed);
-  max-height: 120px;
-  overflow: hidden;
 }
 
-.cursor {
-  animation: pulse 0.8s ease-in-out infinite;
-  color: var(--color-accent);
+.currentQuestionId {
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-muted);
+  background: var(--color-bg-primary);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  margin-right: var(--space-2);
+  font-variant-numeric: tabular-nums;
 }
 
 .completed {

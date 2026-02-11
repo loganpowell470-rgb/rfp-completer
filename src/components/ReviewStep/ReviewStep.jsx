@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRfp } from '../../context/RfpContext';
+import { useToast } from '../../context/ToastContext';
 import Icon from '../common/Icon';
 import Button from '../common/Button';
 import ResponseCard from './ResponseCard';
@@ -8,7 +9,7 @@ import styles from './ReviewStep.module.css';
 
 export default function ReviewStep() {
   const { state, stats } = useRfp();
-  const [copied, setCopied] = useState(false);
+  const { showToast } = useToast();
   const [filterSection, setFilterSection] = useState('all');
 
   // Get unique sections
@@ -21,8 +22,7 @@ export default function ReviewStep() {
   const handleCopyAll = async () => {
     const md = formatAsMarkdown(state.questions, state.responses);
     await copyToClipboard(md);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    showToast('All responses copied to clipboard');
   };
 
   const handleDownload = () => {
@@ -43,8 +43,8 @@ export default function ReviewStep() {
         </div>
         <div className={styles.exportActions}>
           <Button variant="secondary" onClick={handleCopyAll}>
-            <Icon name={copied ? 'check' : 'copy'} size={16} />
-            {copied ? 'Copied!' : 'Copy All'}
+            <Icon name="copy" size={16} />
+            Copy All
           </Button>
           <Button onClick={handleDownload}>
             <Icon name="download" size={16} />
