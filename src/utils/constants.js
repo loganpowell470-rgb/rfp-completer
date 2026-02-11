@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
   parse: '/api/parse',
   generate: '/api/generate',
   regenerate: '/api/regenerate',
+  extract: '/api/extract',
 };
 
 export const MAX_FILE_SIZE = 32 * 1024 * 1024; // 32MB

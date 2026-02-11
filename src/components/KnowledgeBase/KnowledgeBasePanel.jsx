@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRfp } from '../../context/RfpContext';
+import { API_ENDPOINTS } from '../../utils/constants';
 import Icon from '../common/Icon';
+import Spinner from '../common/Spinner';
+import * as XLSX from 'xlsx';
 import styles from './KnowledgeBasePanel.module.css';
 
 const KB_SECTIONS = [
@@ -42,6 +45,8 @@ const KB_SECTIONS = [
   },
 ];
 
+const REFERENCE_FILE_TYPES = ['.pdf', '.txt', '.csv', '.xlsx', '.xls'];
+
 function parseKB(text) {
   const sections = {};
   KB_SECTIONS.forEach((s) => (sections[s.key] = ''));
@@ -52,7 +57,6 @@ function parseKB(text) {
   const matches = [...text.matchAll(headerRegex)];
 
   if (matches.length === 0) {
-    // No headers found — put everything in Company Overview
     sections['Company Overview'] = text.trim();
     return sections;
   }
@@ -63,14 +67,14 @@ function parseKB(text) {
     const endIdx = i + 1 < matches.length ? matches[i + 1].index : text.length;
     const content = text.substring(startIdx, endIdx).trim();
 
-    // Match header to a known section
     const section = KB_SECTIONS.find(
       (s) => s.key.toLowerCase() === headerName.toLowerCase()
     );
     if (section) {
       sections[section.key] = content;
     } else {
-      // Unknown header — append to the closest match or Company Overview
+      if (headerName.toLowerCase().startsWith('reference documents')) continue;
+
       const closest = KB_SECTIONS.find((s) =>
         headerName.toLowerCase().includes(s.key.toLowerCase().split(' ')[0].toLowerCase())
       );
@@ -123,7 +127,7 @@ function SectionCard({ section, value, onChange, defaultExpanded }) {
         )}
         <span className={`${styles.indicator} ${hasFill ? styles.indicatorFilled : ''}`} />
         <Icon
-          name={expanded ? 'chevronRight' : 'chevronRight'}
+          name="chevronRight"
           size={14}
           className={`${styles.chevron} ${expanded ? styles.chevronExpanded : ''}`}
         />
@@ -136,7 +140,6 @@ function SectionCard({ section, value, onChange, defaultExpanded }) {
             value={value}
             onChange={(e) => {
               onChange(e.target.value);
-              // Auto-resize
               const el = e.target;
               el.style.height = 'auto';
               el.style.height = Math.max(80, el.scrollHeight) + 'px';
@@ -150,11 +153,30 @@ function SectionCard({ section, value, onChange, defaultExpanded }) {
   );
 }
 
+function ReferenceDocItem({ doc, onRemove }) {
+  return (
+    <div className={styles.refDocItem}>
+      <Icon name="file" size={14} className={styles.refDocIcon} />
+      <span className={styles.refDocName}>{doc.filename}</span>
+      <span className={styles.refDocWords}>{doc.wordCount}w</span>
+      <button
+        className={styles.refDocRemove}
+        onClick={() => onRemove(doc.id)}
+        title="Remove"
+      >
+        <Icon name="x" size={12} />
+      </button>
+    </div>
+  );
+}
+
 export default function KnowledgeBasePanel() {
   const { state, actions } = useRfp();
   const [sections, setSections] = useState(() => parseKB(state.knowledgeBase));
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+  const fileInputRef = useRef(null);
 
-  // Sync from parent state when panel opens
   const prevOpen = useRef(state.kbPanelOpen);
   useEffect(() => {
     if (state.kbPanelOpen && !prevOpen.current) {
@@ -174,12 +196,88 @@ export default function KnowledgeBasePanel() {
     [actions]
   );
 
+  const handleReferenceUpload = useCallback(async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+
+    const ext = '.' + file.name.split('.').pop().toLowerCase();
+    if (!REFERENCE_FILE_TYPES.includes(ext)) {
+      setUploadError('Unsupported file type. Use PDF, TXT, CSV, or Excel.');
+      return;
+    }
+    if (file.size > 32 * 1024 * 1024) {
+      setUploadError('File too large. Maximum 32MB.');
+      return;
+    }
+
+    setUploadError(null);
+    setUploading(true);
+
+    try {
+      let text = '';
+
+      if (ext === '.pdf') {
+        const reader = new FileReader();
+        const base64 = await new Promise((resolve, reject) => {
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+        const res = await fetch(API_ENDPOINTS.extract, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: base64, filename: file.name }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || 'Failed to extract text from PDF');
+        }
+
+        const data = await res.json();
+        text = data.text;
+      } else if (ext === '.txt') {
+        text = await file.text();
+      } else {
+        const data = new Uint8Array(await file.arrayBuffer());
+        const workbook = XLSX.read(data, { type: 'array' });
+        const lines = [];
+        workbook.SheetNames.forEach((name) => {
+          const sheet = workbook.Sheets[name];
+          if (workbook.SheetNames.length > 1) lines.push(`--- Sheet: ${name} ---`);
+          lines.push(XLSX.utils.sheet_to_csv(sheet, { blankrows: false }));
+        });
+        text = lines.join('\n').trim();
+      }
+
+      if (!text.trim()) {
+        setUploadError('File appears to be empty.');
+        setUploading(false);
+        return;
+      }
+
+      actions.addReferenceDoc({
+        id: Date.now().toString(),
+        filename: file.name,
+        text: text.trim(),
+        wordCount: wordCount(text),
+      });
+    } catch (err) {
+      setUploadError(err.message || 'Failed to process file.');
+    } finally {
+      setUploading(false);
+    }
+  }, [actions]);
+
   if (!state.kbPanelOpen) return null;
 
   const totalWords = KB_SECTIONS.reduce(
     (sum, s) => sum + wordCount(sections[s.key]),
     0
   );
+  const refDocWords = state.referenceDocs.reduce((sum, d) => sum + d.wordCount, 0);
   const filledCount = KB_SECTIONS.filter((s) => sections[s.key]?.trim()).length;
 
   return (
@@ -201,7 +299,13 @@ export default function KnowledgeBasePanel() {
               {filledCount}/{KB_SECTIONS.length} sections
             </span>
             <span className={styles.statDot}>·</span>
-            <span className={styles.stat}>{totalWords} words</span>
+            <span className={styles.stat}>{totalWords + refDocWords} words</span>
+            {state.referenceDocs.length > 0 && (
+              <>
+                <span className={styles.statDot}>·</span>
+                <span className={styles.stat}>{state.referenceDocs.length} ref doc{state.referenceDocs.length !== 1 ? 's' : ''}</span>
+              </>
+            )}
           </div>
         </div>
         <div className={styles.sectionsList}>
@@ -214,6 +318,55 @@ export default function KnowledgeBasePanel() {
               defaultExpanded={!!sections[section.key]?.trim()}
             />
           ))}
+
+          {/* Reference Documents */}
+          <div className={styles.refSection}>
+            <div className={styles.refSectionHeader}>
+              <Icon name="upload" size={16} className={styles.sectionIcon} />
+              <span className={styles.sectionLabel}>Reference Documents</span>
+              <span className={styles.refHint}>Past RFPs, proposals</span>
+            </div>
+
+            {state.referenceDocs.length > 0 && (
+              <div className={styles.refDocList}>
+                {state.referenceDocs.map((doc) => (
+                  <ReferenceDocItem
+                    key={doc.id}
+                    doc={doc}
+                    onRemove={actions.removeReferenceDoc}
+                  />
+                ))}
+              </div>
+            )}
+
+            <button
+              className={styles.refUploadBtn}
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <>
+                  <Spinner size={14} />
+                  <span>Extracting text...</span>
+                </>
+              ) : (
+                <>
+                  <Icon name="plus" size={14} />
+                  <span>Upload reference document</span>
+                </>
+              )}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.txt,.csv,.xlsx,.xls"
+              onChange={handleReferenceUpload}
+              className={styles.hiddenInput}
+            />
+            {uploadError && (
+              <p className={styles.refError}>{uploadError}</p>
+            )}
+          </div>
         </div>
       </div>
     </>

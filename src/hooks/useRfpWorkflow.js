@@ -16,6 +16,7 @@ const initialState = {
 
   // Knowledge base
   knowledgeBase: SAMPLE_KNOWLEDGE_BASE,
+  referenceDocs: [], // [{ id, filename, text, wordCount }]
 
   // Parse
   parseStatus: 'idle',
@@ -71,6 +72,12 @@ function rfpReducer(state, action) {
 
     case 'SET_KNOWLEDGE_BASE':
       return { ...state, knowledgeBase: action.payload };
+
+    case 'ADD_REFERENCE_DOC':
+      return { ...state, referenceDocs: [...state.referenceDocs, action.payload] };
+
+    case 'REMOVE_REFERENCE_DOC':
+      return { ...state, referenceDocs: state.referenceDocs.filter(d => d.id !== action.payload) };
 
     case 'TOGGLE_KB_PANEL':
       return { ...state, kbPanelOpen: !state.kbPanelOpen };
@@ -218,6 +225,14 @@ export function useRfpWorkflow() {
     dispatch({ type: 'SET_KNOWLEDGE_BASE', payload: text });
   }, []);
 
+  const addReferenceDoc = useCallback((doc) => {
+    dispatch({ type: 'ADD_REFERENCE_DOC', payload: doc });
+  }, []);
+
+  const removeReferenceDoc = useCallback((id) => {
+    dispatch({ type: 'REMOVE_REFERENCE_DOC', payload: id });
+  }, []);
+
   const parseDocument = useCallback(async () => {
     dispatch({ type: 'PARSE_START' });
 
@@ -253,9 +268,18 @@ export function useRfpWorkflow() {
   const generateResponses = useCallback(async () => {
     dispatch({ type: 'GENERATE_START' });
 
+    // Build full KB with reference docs appended
+    let fullKB = state.knowledgeBase;
+    if (state.referenceDocs.length > 0) {
+      const refTexts = state.referenceDocs
+        .map(d => `### ${d.filename}\n${d.text}`)
+        .join('\n\n');
+      fullKB += `\n\n# Reference Documents (Previously Completed RFPs)\n${refTexts}`;
+    }
+
     const body = {
       questions: state.questions,
-      knowledgeBase: state.knowledgeBase,
+      knowledgeBase: fullKB,
       rfpContext: state.uploadType === 'text' ? state.rawText : '',
     };
 
@@ -351,15 +375,25 @@ export function useRfpWorkflow() {
         dispatch({ type: 'GENERATE_ERROR', payload: err.message });
       },
     });
-  }, [state.questions, state.knowledgeBase, state.uploadType, state.rawText, fetchStream]);
+  }, [state.questions, state.knowledgeBase, state.referenceDocs, state.uploadType, state.rawText, fetchStream]);
 
   const regenerateResponse = useCallback(async (questionId, instructions = '') => {
     dispatch({ type: 'REGENERATE_START', payload: questionId });
 
     const question = state.questions.find(q => q.id === questionId);
+
+    // Build full KB with reference docs appended
+    let regenKB = state.knowledgeBase;
+    if (state.referenceDocs.length > 0) {
+      const refTexts = state.referenceDocs
+        .map(d => `### ${d.filename}\n${d.text}`)
+        .join('\n\n');
+      regenKB += `\n\n# Reference Documents (Previously Completed RFPs)\n${refTexts}`;
+    }
+
     const body = {
       question,
-      knowledgeBase: state.knowledgeBase,
+      knowledgeBase: regenKB,
       rfpContext: state.uploadType === 'text' ? state.rawText : '',
       instructions,
     };
@@ -383,7 +417,7 @@ export function useRfpWorkflow() {
         });
       },
     });
-  }, [state.questions, state.knowledgeBase, state.uploadType, state.rawText, fetchStream]);
+  }, [state.questions, state.knowledgeBase, state.referenceDocs, state.uploadType, state.rawText, fetchStream]);
 
   const updateResponse = useCallback((questionId, text) => {
     dispatch({ type: 'UPDATE_RESPONSE', payload: { questionId, text } });
@@ -424,6 +458,8 @@ export function useRfpWorkflow() {
       uploadText,
       uploadSpreadsheet,
       setKnowledgeBase,
+      addReferenceDoc,
+      removeReferenceDoc,
       parseDocument,
       generateResponses,
       regenerateResponse,

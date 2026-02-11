@@ -6,6 +6,7 @@
   "functions": {
     "api/generate.js": { "maxDuration": 60 },
     "api/parse.js": { "maxDuration": 60 },
-    "api/regenerate.js": { "maxDuration": 30 }
+    "api/regenerate.js": { "maxDuration": 30 },
+    "api/extract.js": { "maxDuration": 60 }
   }
 }

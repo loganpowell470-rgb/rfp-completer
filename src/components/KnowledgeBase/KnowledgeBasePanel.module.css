@@ -218,6 +218,125 @@
   opacity: 0.6;
 }
 
+/* ── Reference Documents ── */
+
+.refSection {
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  margin-top: var(--space-1);
+}
+
+.refSectionHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.refHint {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  opacity: 0.7;
+  margin-left: auto;
+}
+
+.refDocList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
+.refDocItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-2);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.refDocIcon {
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.refDocName {
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.refDocWords {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  background: var(--color-bg-elevated);
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  font-weight: var(--weight-medium);
+  flex-shrink: 0;
+}
+
+.refDocRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.refDocRemove:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-error);
+}
+
+.refUploadBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.refUploadBtn:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
+}
+
+.refUploadBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.refError {
+  font-size: var(--text-xs);
+  color: var(--color-error);
+  margin-top: var(--space-2);
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
