@@ -67,7 +67,7 @@ export default function UploadStep() {
             </div>
           ) : (
             <>
-              <Icon name="upload" size={36} className={styles.uploadIcon} />
+              <Icon name="upload" size={28} className={styles.uploadIcon} />
               <p className={styles.dropText}>
                 {isDragging ? 'Drop your file here' : 'Drag & drop your RFP document'}
               </p>
@@ -97,7 +97,7 @@ export default function UploadStep() {
           placeholder="Paste your RFP content here..."
           value={state.rawText}
           onChange={(e) => actions.uploadText(e.target.value)}
-          rows={8}
+          rows={3}
           disabled={!!state.pdfFilename}
         />
       </div>
